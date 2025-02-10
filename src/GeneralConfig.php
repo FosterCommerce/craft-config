@@ -46,6 +46,7 @@ class GeneralConfig
 			->runQueueAutomatically($isDev)
 			->sendPoweredByHeader(false)
 			->preloadSingles(false)
+			->generateTransformsBeforePageLoad()
 			->verificationCodeDuration(self::VERIFICATION_CODE_DURATION)
 			->aliases(array_filter([
 				'@webroot' => dirname($baseDir) . '/web',
