@@ -191,19 +191,9 @@ class AppConfigBuilder
 		return $this;
 	}
 
-	public function withMailTransportSmtp(): self
+	public function withMailTransport(MailTransport $transport): self
 	{
-		//*
-		$this->mailTransportConfigs['smtp'] = static fn (): array => [
-			\craft\mail\transportadapters\Smtp::class,
-			[
-				'host' => App::env('MAIL_HOST'),
-				'port' => App::env('MAIL_PORT'),
-				'useAuthentication' => App::env('MAIL_USE_AUTHENTICATION'),
-				'username' => App::env('MAIL_USERNAME'),
-				'password' => App::env('MAIL_PASSWORD'),
-			],
-		];
+		$this->mailTransportConfigs[$transport->value] = static fn (): array => $transport->getConfiguration();
 
 		return $this;
 	}
