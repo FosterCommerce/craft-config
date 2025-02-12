@@ -4,6 +4,7 @@ namespace fostercommerce\craftconfig;
 
 use Craft;
 use craft\helpers\App;
+use craft\helpers\MailerHelper;
 use craft\log\Dispatcher;
 use craft\log\MonologTarget;
 use craft\web\Request;
@@ -69,6 +70,11 @@ class AppConfigBuilder
 	private array $loggerExcept = [];
 
 	/**
+	 * @var array<non-empty-string, callable(): array{0: class-string, 1: array<array-key, mixed>}>
+	 */
+	private array $mailTransportConfigs = [];
+
+	/**
 	 * @throws Exception
 	 * @throws InvalidConfigException
 	 */
@@ -107,11 +113,27 @@ class AppConfigBuilder
 		// Do this here so that changes to the filter and except functions are applied.
 		$this->configureLogTargets();
 
+		$components = $this->components;
+
+		if ($this->mailTransportConfigs !== []) {
+			$components['mailer'] = function () {
+				// Get the default component config:
+				$config = App::mailerConfig();
+
+				$mailTransportConfigFn = $this->mailTransportConfigs[App::env('MAIL_MAILER')];
+				$mailTransportConfig = $mailTransportConfigFn();
+				$adapter = MailerHelper::createTransportAdapter($mailTransportConfig[0], $mailTransportConfig[1]); // @phpstan-ignore-line We can't specify the TransportInterfaceAdapter dynamically
+				$config['transport'] = $adapter->defineTransport();
+
+				return Craft::createObject($config);
+			};
+		}
+
 		return [
 			'id' => $this->appId,
 			'modules' => $this->modules,
 			'bootstrap' => array_keys($this->modules),
-			'components' => $this->components,
+			'components' => $components,
 		];
 	}
 
@@ -165,6 +187,23 @@ class AppConfigBuilder
 	public function withLoggerExceptError(array $except): self
 	{
 		$this->loggerExceptError = $except;
+
+		return $this;
+	}
+
+	public function withMailTransportSmtp(): self
+	{
+		//*
+		$this->mailTransportConfigs['smtp'] = static fn (): array => [
+			\craft\mail\transportadapters\Smtp::class,
+			[
+				'host' => App::env('MAIL_HOST'),
+				'port' => App::env('MAIL_PORT'),
+				'useAuthentication' => App::env('MAIL_USE_AUTHENTICATION'),
+				'username' => App::env('MAIL_USERNAME'),
+				'password' => App::env('MAIL_PASSWORD'),
+			],
+		];
 
 		return $this;
 	}
