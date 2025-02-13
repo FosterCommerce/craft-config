@@ -20,7 +20,10 @@ use yii\log\Logger as YiiLogger;
 
 class AppConfigBuilder
 {
-	private const int QUEUE_TTR = 7200;
+	/**
+	 * @var int
+	 */
+	private const QUEUE_TTR = 7200;
 
 	/**
 	 * @var callable(array<array-key, mixed>): bool
@@ -316,7 +319,7 @@ class AppConfigBuilder
 				$udpHost,
 				$udpPort,
 				LOG_USER,
-				Level::Debug,
+				class_exists(\Monolog\Level::class, false) ? Level::Debug : Logger::DEBUG,
 				true,
 				$token,
 			);
@@ -324,24 +327,29 @@ class AppConfigBuilder
 			$this->logger?->pushHandler($syslogHandler);
 
 			$this->logger?->pushProcessor(
-				fn (LogRecord $record): LogRecord => // Using $logRecord->with() does the same thing with a little bit of overhead.
-					// It also caused an issue, so this resolves it.
-				new LogRecord(
-					datetime: $record->datetime,
-					channel: $record->channel,
-					level: $record->level,
-					message: $record->message,
-					context: [
-						...$record->context,
-					],
-					extra: [
-						...$record->extra,
+				fn (LogRecord $record): array|LogRecord => interface_exists(\Monolog\LogRecord::class) // @phpstan-ignore-line
+					? [
+						...$record->toArray, // @phpstan-ignore-line
 						'rid' => $this->requestId,
 						'environment' => $this->appEnvironment,
 						'path' => $this->getRequestPath(),
-					],
-					formatted: $record->formatted,
-				)
+					]
+					: new \Monolog\LogRecord(
+						datetime: $record->datetime,
+						channel: $record->channel,
+						level: $record->level,
+						message: $record->message,
+						context: [
+							...$record->context,
+						],
+						extra: [
+							...$record->extra,
+							'rid' => $this->requestId,
+							'environment' => $this->appEnvironment,
+							'path' => $this->getRequestPath(),
+						],
+						formatted: $record->formatted,
+					)
 			);
 		}
 
