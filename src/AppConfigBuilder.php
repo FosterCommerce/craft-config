@@ -203,7 +203,7 @@ class AppConfigBuilder
 
 	private function getRequestPath(): ?string
 	{
-		if ($this->isConsoleRequest === true) {
+		if ($this->isConsoleRequest !== true) {
 			/** @var Request $request */
 			$request = Craft::$app->getRequest();
 			return $request->getPathInfo();
@@ -328,28 +328,28 @@ class AppConfigBuilder
 
 			$this->logger?->pushProcessor(
 				fn (LogRecord $record): array|LogRecord => interface_exists(\Monolog\LogRecord::class) // @phpstan-ignore-line
-					? [
-						...$record->toArray, // @phpstan-ignore-line
+				? [
+					...$record->toArray(),
+					'rid' => $this->requestId,
+					'environment' => $this->appEnvironment,
+					'path' => $this->getRequestPath(),
+				]
+				: new \Monolog\LogRecord(
+					datetime: $record->datetime,
+					channel: $record->channel,
+					level: $record->level,
+					message: $record->message,
+					context: [
+						...$record->context,
+					],
+					extra: [
+						...$record->extra,
 						'rid' => $this->requestId,
 						'environment' => $this->appEnvironment,
 						'path' => $this->getRequestPath(),
-					]
-					: new \Monolog\LogRecord(
-						datetime: $record->datetime,
-						channel: $record->channel,
-						level: $record->level,
-						message: $record->message,
-						context: [
-							...$record->context,
-						],
-						extra: [
-							...$record->extra,
-							'rid' => $this->requestId,
-							'environment' => $this->appEnvironment,
-							'path' => $this->getRequestPath(),
-						],
-						formatted: $record->formatted,
-					)
+					],
+					formatted: $record->formatted,
+				)
 			);
 		}
 
