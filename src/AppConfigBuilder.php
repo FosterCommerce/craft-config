@@ -114,17 +114,17 @@ class AppConfigBuilder
 	 * @throws Exception
 	 * @throws InvalidConfigException
 	 */
-	public static function create(): self
+	public static function create(?string $appId = null, ?string $environment = null): self
 	{
 		$instance = new self();
 
 		/** @var string $id */
-		$id = App::env('CRAFT_APP_ID') ?: 'CraftCMS';
+		$id = $appId ?? (App::env('CRAFT_APP_ID') ?: 'CraftCMS');
 		$instance->appId = $id;
 
-		/** @var string $environment */
-		$environment = App::env('CRAFT_ENVIRONMENT');
-		$instance->appEnvironment = $environment;
+		/** @var string $appEnvironment */
+		$appEnvironment = $environment ?? App::env('CRAFT_ENVIRONMENT');
+		$instance->appEnvironment = $appEnvironment;
 
 		$instance->loggingAppName = $instance->appId;
 
