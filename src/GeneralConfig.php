@@ -27,24 +27,28 @@ class GeneralConfig
 
 	/**
 	 * Create an opinionated, pre-configured Craft general config
-	 *
-	 * @param array{
-	 * 	aliases?: ?array<array-key, string>,
-	 *  devMode?: ?bool,
-	 * } $extra
 	 */
-	public static function configure(string $baseDir, ?CraftConfig $config, array $extra = []): CraftGeneralConfig
+	public static function configure(string $baseDir, ?CraftConfig $config, ?ExtraConfig $extraConfig): CraftGeneralConfig
 	{
 		// $config is derived from the `CraftConfig::getConfigFromFile` method.
 		if (! $config instanceof CraftConfig) {
 			throw new \RuntimeException('$config cannot be not be null');
 		}
 
-		$extraDevMode = $extra['devMode'] ?? null;
-		$isDev = $extraDevMode ?? $config->env === 'dev';
+		$extraConfig ??= new ExtraConfig();
 
-		/** @var ?string $primarySiteUrl */
-		$primarySiteUrl = App::env('PRIMARY_SITE_URL');
+		$isDev = $extraConfig->devMode ?? $config->env === 'dev';
+
+		$primarySiteUrl = $extraConfig->primarySiteUrl ?? App::env('PRIMARY_SITE_URL');
+
+		/** @var array<non-empty-string, ?string> */
+		$aliases = array_filter($extraConfig->mergeAliases
+			? [
+				'@webroot' => dirname($baseDir) . '/web',
+				'@web' => $primarySiteUrl, // Excluded if null
+				...$extraConfig->aliases,
+			]
+			: $extraConfig->aliases);
 
 		return CraftGeneralConfig::create()
 			->useEmailAsUsername()
@@ -60,10 +64,6 @@ class GeneralConfig
 			->generateTransformsBeforePageLoad()
 			->verificationCodeDuration(self::VERIFICATION_CODE_DURATION)
 			->maxUploadFileSize(self::DEFAULT_MAX_FILE_UPLOAD_SIZE)
-			->aliases(array_filter([
-				'@webroot' => dirname($baseDir) . '/web',
-				'@web' => $primarySiteUrl, // Excluded if null
-				...$extra['aliases'] ?? [],
-			]));
+			->aliases($aliases);
 	}
 }
