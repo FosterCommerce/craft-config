@@ -174,12 +174,12 @@ class AppConfigBuilder
 	}
 
 	/**
-	 * @param array<non-empty-string, class-string> $modules
+	 * @param array<non-empty-string, ?class-string> $modules
 	 * @return $this
 	 */
 	public function withModules(array $modules): self
 	{
-		$this->modules = $modules;
+		$this->modules = array_filter($modules);
 		return $this;
 	}
 
