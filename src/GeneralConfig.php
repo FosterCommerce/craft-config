@@ -27,8 +27,10 @@ class GeneralConfig
 
 	/**
 	 * Create an opinionated, pre-configured Craft general config
+	 *
+	 * @param array<array-key, string> $aliases
 	 */
-	public static function configure(string $baseDir, ?CraftConfig $config): CraftGeneralConfig
+	public static function configure(string $baseDir, ?CraftConfig $config, array $aliases = []): CraftGeneralConfig
 	{
 		// $config is derived from the `CraftConfig::getConfigFromFile` method.
 		if (! $config instanceof CraftConfig) {
@@ -57,6 +59,7 @@ class GeneralConfig
 			->aliases(array_filter([
 				'@webroot' => dirname($baseDir) . '/web',
 				'@web' => $primarySiteUrl, // Excluded if null
+				...$aliases,
 			]));
 	}
 }
