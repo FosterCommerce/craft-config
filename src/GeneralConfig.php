@@ -28,16 +28,20 @@ class GeneralConfig
 	/**
 	 * Create an opinionated, pre-configured Craft general config
 	 *
-	 * @param array<array-key, string> $aliases
+	 * @param array{
+	 * 	aliases?: ?array<array-key, string>,
+	 *  devMode?: ?bool,
+	 * } $extra
 	 */
-	public static function configure(string $baseDir, ?CraftConfig $config, array $aliases = []): CraftGeneralConfig
+	public static function configure(string $baseDir, ?CraftConfig $config, array $extra = []): CraftGeneralConfig
 	{
 		// $config is derived from the `CraftConfig::getConfigFromFile` method.
 		if (! $config instanceof CraftConfig) {
 			throw new \RuntimeException('$config cannot be not be null');
 		}
 
-		$isDev = $config->env === 'dev';
+		$extraDevMode = $extra['devMode'] ?? null;
+		$isDev = $extraDevMode ?? $config->env === 'dev';
 
 		/** @var ?string $primarySiteUrl */
 		$primarySiteUrl = App::env('PRIMARY_SITE_URL');
@@ -59,7 +63,7 @@ class GeneralConfig
 			->aliases(array_filter([
 				'@webroot' => dirname($baseDir) . '/web',
 				'@web' => $primarySiteUrl, // Excluded if null
-				...$aliases,
+				...$extra['aliases'] ?? [],
 			]));
 	}
 }
