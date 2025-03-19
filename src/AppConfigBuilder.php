@@ -21,9 +21,42 @@ use yii\log\Logger as YiiLogger;
 class AppConfigBuilder
 {
 	/**
+	 * @var array<array-key, string>
+	 */
+	public const DEFAULT_EXCLUDE_MESSAGE_PATTERNS = [
+		'/^(.*plugin loaded$).*/',
+		'/^(.*module loaded$).*/',
+		'/^(.*module bootstrapped$).*/',
+		'/^(.*Updating search indexes).*/',
+	];
+
+	/**
 	 * @var int
 	 */
 	private const QUEUE_TTR = 7200;
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const DEFAULT_LOGGER_EXCEPT = [
+		// Exclude logs by category
+		\craft\elements\User::class . '::_validateUserAgent',
+		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
+		\yii\db\Connection::class . '::*',
+		\yii\web\Session::class . '::*',
+		\yii\web\User::class . '::loginByCookie',
+		\yii\web\User::class . '::login',
+		\yii\web\User::class . '::logout',
+		'nystudio107\seomatic\*',
+	];
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const DEFAULT_LOGGER_EXCEPT_ERROR = [
+		// Exclude logs in the error log target
+		\yii\web\HttpException::class . ':404',
+	];
 
 	/**
 	 * @var callable(array<array-key, mixed>): bool
@@ -65,12 +98,12 @@ class AppConfigBuilder
 	/**
 	 * @var array<int, string>
 	 */
-	private array $loggerExceptError = [];
+	private array $loggerExceptError = self::DEFAULT_LOGGER_EXCEPT_ERROR;
 
 	/**
 	 * @var array<int, string>
 	 */
-	private array $loggerExcept = [];
+	private array $loggerExcept = self::DEFAULT_LOGGER_EXCEPT;
 
 	/**
 	 * @var array<non-empty-string, callable(): array{0: class-string, 1: array<array-key, mixed>}>
@@ -174,22 +207,34 @@ class AppConfigBuilder
 
 	/**
 	 * @param array<int, string> $except
+	 * @param bool $merge If `false`, the default except array will be replaced.
 	 * @return $this
 	 */
-	public function withLoggerExcept(array $except): self
+	public function withLoggerExcept(array $except, bool $merge = true): self
 	{
-		$this->loggerExcept = $except;
+		$this->loggerExcept = $merge
+			? [
+				...$this->loggerExcept,
+				...$except,
+			]
+			: $except;
 
 		return $this;
 	}
 
 	/**
 	 * @param array<int, string> $except
+	 * @param bool $merge If `false`, the default except array will be replaced.
 	 * @return $this
 	 */
-	public function withLoggerExceptError(array $except): self
+	public function withLoggerExceptError(array $except, bool $merge = true): self
 	{
-		$this->loggerExceptError = $except;
+		$this->loggerExceptError = $merge
+			? [
+				...$this->loggerExceptError,
+				...$except,
+			]
+			: $except;
 
 		return $this;
 	}
@@ -366,8 +411,25 @@ class AppConfigBuilder
 				'name' => 'disabled',
 			];
 
-			$loggerFilterErrorFn = $this->loggerFilterErrorFn;
-			$loggerFilterFn = $this->loggerFilterFn;
+			$loggerFilterFn = function (array $message): bool {
+				// Exclude logs by filtering out messages
+				// Position 0 is the message
+				// Position 1 is the category
+				foreach (self::DEFAULT_EXCLUDE_MESSAGE_PATTERNS as $excludeMessagePattern) {
+					if (preg_match($excludeMessagePattern, (string) $message[0])) {
+						return false;
+					}
+				}
+
+				$loggerFilterFn = $this->loggerFilterFn;
+				return $loggerFilterFn($message);
+			};
+
+			$loggerFilterErrorFn = function (array $message): bool {
+				// placeholder if we need to filter any error logs
+				$loggerFilterErrorFn = $this->loggerFilterErrorFn;
+				return $loggerFilterErrorFn($message);
+			};
 
 			$this->components['log'] = [
 				'targets' => [

@@ -21,6 +21,11 @@ class GeneralConfig
 	public const VERIFICATION_CODE_DURATION = 'P2D'; // 2 days
 
 	/**
+	 * The default maximum file upload size
+	 */
+	public const DEFAULT_MAX_FILE_UPLOAD_SIZE = '64M'; // 64MB
+
+	/**
 	 * Create an opinionated, pre-configured Craft general config
 	 */
 	public static function configure(string $baseDir, ?CraftConfig $config): CraftGeneralConfig
@@ -48,6 +53,7 @@ class GeneralConfig
 			->preloadSingles(false)
 			->generateTransformsBeforePageLoad()
 			->verificationCodeDuration(self::VERIFICATION_CODE_DURATION)
+			->maxUploadFileSize(self::DEFAULT_MAX_FILE_UPLOAD_SIZE)
 			->aliases(array_filter([
 				'@webroot' => dirname($baseDir) . '/web',
 				'@web' => $primarySiteUrl, // Excluded if null
