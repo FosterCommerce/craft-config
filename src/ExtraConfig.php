@@ -8,6 +8,8 @@ class ExtraConfig extends Model
 {
 	public ?bool $devMode = null;
 
+	public ?bool $isProduction = null;
+
 	public ?string $primarySiteUrl = null;
 
 	/**

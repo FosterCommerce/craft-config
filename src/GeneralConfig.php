@@ -39,6 +39,8 @@ class GeneralConfig
 
 		$isDev = $extraConfig->devMode ?? $config->env === 'dev';
 
+		$isProduction = $extraConfig->isProduction ?? $config->env === 'production';
+
 		$primarySiteUrl = $extraConfig->primarySiteUrl ?? App::env('PRIMARY_SITE_URL');
 
 		/** @var array<non-empty-string, ?string> */
@@ -64,6 +66,7 @@ class GeneralConfig
 			->generateTransformsBeforePageLoad()
 			->verificationCodeDuration(self::VERIFICATION_CODE_DURATION)
 			->maxUploadFileSize(self::DEFAULT_MAX_FILE_UPLOAD_SIZE)
+			->disallowRobots(! $isProduction)
 			->aliases($aliases);
 	}
 }

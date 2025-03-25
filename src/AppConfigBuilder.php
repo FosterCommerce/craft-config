@@ -364,7 +364,7 @@ class AppConfigBuilder
 				$udpHost,
 				$udpPort,
 				LOG_USER,
-				class_exists(\Monolog\Level::class, false) ? Level::Debug : Logger::DEBUG,
+				Level::Debug,
 				true,
 				$token,
 			);
@@ -372,14 +372,7 @@ class AppConfigBuilder
 			$this->logger?->pushHandler($syslogHandler);
 
 			$this->logger?->pushProcessor(
-				fn (LogRecord $record): array|LogRecord => interface_exists(\Monolog\LogRecord::class) // @phpstan-ignore-line
-				? [
-					...$record->toArray(),
-					'rid' => $this->requestId,
-					'environment' => $this->appEnvironment,
-					'path' => $this->getRequestPath(),
-				]
-				: new \Monolog\LogRecord(
+				fn (LogRecord $record): LogRecord => new LogRecord(
 					datetime: $record->datetime,
 					channel: $record->channel,
 					level: $record->level,
