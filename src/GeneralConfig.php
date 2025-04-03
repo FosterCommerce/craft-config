@@ -28,7 +28,7 @@ class GeneralConfig
 	/**
 	 * Create an opinionated, pre-configured Craft general config
 	 */
-	public static function configure(string $baseDir, ?CraftConfig $config, ?ExtraConfig $extraConfig): CraftGeneralConfig
+	public static function configure(string $baseDir, ?CraftConfig $config, ?ExtraConfig $extraConfig = null): CraftGeneralConfig
 	{
 		// $config is derived from the `CraftConfig::getConfigFromFile` method.
 		if (! $config instanceof CraftConfig) {
