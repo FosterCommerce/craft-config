@@ -59,14 +59,14 @@ class AppConfigBuilder
 	];
 
 	/**
-	 * @var callable(array<array-key, mixed>): bool
+	 * @var callable(string[]): bool
 	 */
-	public $loggerFilterFn;
+	private $loggerFilterFn;
 
 	/**
-	 * @var callable(array<array-key, mixed>): bool
+	 * @var callable(string[]): bool
 	 */
-	public $loggerFilterErrorFn;
+	private $loggerFilterErrorFn;
 
 	private ?string $appId = null;
 
@@ -174,6 +174,10 @@ class AppConfigBuilder
 	}
 
 	/**
+	 * Add modules to the app config.
+	 *
+	 * Modules added here will automatically be bootstrapped as well.
+	 *
 	 * @param array<non-empty-string, ?class-string> $modules
 	 * @return $this
 	 */
@@ -184,7 +188,11 @@ class AppConfigBuilder
 	}
 
 	/**
-	 * @param callable(array<array-key, mixed>): bool $filterFn a callback which returns an array of items to exclude from the logs
+	 * Add a custom error log filter function.
+	 *
+	 * Returning false from the filter function will exclude the log message from error logs.
+	 *
+	 * @param callable(string[]): bool $filterFn
 	 * @return $this
 	 */
 	public function withLoggerFilterFn(callable $filterFn): self
@@ -195,7 +203,11 @@ class AppConfigBuilder
 	}
 
 	/**
-	 * @param callable(array<array-key, mixed>): bool $filterFn a callback which returns an array of items to exclude from the _error_ logs
+	 * Add a custom log filter function.
+	 *
+	 * Returning false from the filter function will exclude the log message from logs.
+	 *
+	 * @param callable(string[]): bool $filterFn
 	 * @return $this
 	 */
 	public function withLoggerFilterErrorFn(callable $filterFn): self
@@ -206,6 +218,8 @@ class AppConfigBuilder
 	}
 
 	/**
+	 * Excludes logs with the given categories.
+	 *
 	 * @param array<int, string> $except
 	 * @param bool $merge If `false`, the default except array will be replaced.
 	 * @return $this
@@ -223,6 +237,8 @@ class AppConfigBuilder
 	}
 
 	/**
+	 * Excludes error logs with the given categories from the error log.
+	 *
 	 * @param array<int, string> $except
 	 * @param bool $merge If `false`, the default except array will be replaced.
 	 * @return $this
@@ -239,6 +255,9 @@ class AppConfigBuilder
 		return $this;
 	}
 
+	/**
+	 * Include mail transport configuration
+	 */
 	public function withMailTransport(MailTransport $transport): self
 	{
 		$this->mailTransportConfigs[$transport->value] = static fn (): array => $transport->getConfiguration();

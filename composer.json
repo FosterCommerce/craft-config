@@ -1,7 +1,7 @@
 {
 	"name": "fostercommerce/craft-config",
 	"type": "library",
-	"license": "proprietary",
+	"license": "MIT",
 	"version": "0.1.0",
 	"autoload": {
 		"psr-4": {

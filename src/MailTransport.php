@@ -6,6 +6,9 @@ use craft\helpers\App;
 
 enum MailTransport: string
 {
+	/**
+	 * SMTP transport.
+	 */
 	case SMTP = 'smtp';
 
 	/**

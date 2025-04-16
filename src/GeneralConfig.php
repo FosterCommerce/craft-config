@@ -8,6 +8,9 @@ use craft\services\Config as CraftConfig;
 
 class GeneralConfig
 {
+	/**
+	 * The default day of the week for the week start.
+	 */
 	public const MONDAY = 1;
 
 	/**
@@ -26,7 +29,7 @@ class GeneralConfig
 	public const DEFAULT_MAX_FILE_UPLOAD_SIZE = '64M'; // 64MB
 
 	/**
-	 * Create an opinionated, pre-configured Craft general config
+	 * Create an opinionated, pre-configured Craft general config instance
 	 */
 	public static function configure(string $baseDir, ?CraftConfig $config, ?ExtraConfig $extraConfig = null): CraftGeneralConfig
 	{
