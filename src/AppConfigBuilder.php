@@ -40,6 +40,7 @@ class AppConfigBuilder
 	 */
 	private const DEFAULT_LOGGER_EXCEPT = [
 		// Exclude logs by category
+		\craft\elements\Asset::class . '::getDimensions',
 		\craft\elements\User::class . '::_validateUserAgent',
 		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
 		\yii\db\Connection::class . '::*',
@@ -47,7 +48,10 @@ class AppConfigBuilder
 		\yii\web\User::class . '::loginByCookie',
 		\yii\web\User::class . '::login',
 		\yii\web\User::class . '::logout',
+		\yii\web\User::class . '::renewAuthStatus',
+		\yii\web\User::class . '::getIdentityAndDurationFromCookie',
 		'nystudio107\seomatic\*',
+		'blitz',
 	];
 
 	/**
