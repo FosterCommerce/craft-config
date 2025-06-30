@@ -33,7 +33,12 @@ class AppConfigBuilder
 	/**
 	 * @var int
 	 */
-	private const QUEUE_TTR = 7200;
+	private const DEFAULT_QUEUE_TTR = 7200;
+
+	/**
+	 * @var int
+	 */
+	private const DEFAULT_REDIS_DATABASE = 0;
 
 	/**
 	 * @var array<int, string>
@@ -307,7 +312,8 @@ class AppConfigBuilder
 		/** @var ?string $redisHost */
 		$redisHost = App::env('REDIS_HOST') ?: null;
 		if ($redisHost !== null) {
-			$database = App::env('REDIS_DATABASE') ?: 0;
+			$database = App::env('REDIS_DATABASE') ?: self::DEFAULT_REDIS_DATABASE;
+
 			$this->components['redis'] = [
 				'class' => \yii\redis\Connection::class,
 				'hostname' => App::env('REDIS_HOST'),
@@ -521,7 +527,7 @@ class AppConfigBuilder
 	private function configureQueue(): self
 	{
 		$this->components['queue'] = [
-			'ttr' => self::QUEUE_TTR,
+			'ttr' => App::env('QUEUE_TTR') ?: self::DEFAULT_QUEUE_TTR,
 		];
 		return $this;
 	}

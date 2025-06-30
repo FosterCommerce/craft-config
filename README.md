@@ -129,6 +129,12 @@ Required environment variables for SMTP:
 - `MAIL_USERNAME`
 - `MAIL_PASSWORD`
 
+### Queue Configuration
+
+The `queue` component is automatically configured with a default TTR of 7200 seconds.
+
+To configure the TTR, set the `QUEUE_TTR` environment variable.
+
 ### Redis Configuration
 
 Redis configuration is automatically included if the `REDIS_HOST` environment variable is set.
