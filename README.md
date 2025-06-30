@@ -134,6 +134,19 @@ To configure Redis, set the following environment variables:
 - `REDIS_PASSWORD` (optional)
 - `REDIS_DEFAULT_DURATION`
 - `REDIS_KEY_PREFIX`
+- `REDIS_DATABASE`
+
+#### Redis Mutex
+
+Redis-backed mutex component is automatically configured if the `REDIS_MUTEX_ENABLED` environment variable is set to `true`.
+
+To use a different Redis database for the mutex component, set the `REDIS_MUTEX_DATABASE` environment variable.
+
+#### Redis Session
+
+Redis-backed sessions are automatically configured if the `REDIS_SESSION_ENABLED` environment variable is set to `true`.
+
+To use a different Redis database for sessions, set the `REDIS_SESSION_DATABASE` environment variable.
 
 ### Logging Configuration
 

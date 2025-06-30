@@ -307,10 +307,12 @@ class AppConfigBuilder
 		/** @var ?string $redisHost */
 		$redisHost = App::env('REDIS_HOST') ?: null;
 		if ($redisHost !== null) {
+			$database = App::env('REDIS_DATABASE') ?: 0;
 			$this->components['redis'] = [
 				'class' => \yii\redis\Connection::class,
 				'hostname' => App::env('REDIS_HOST'),
 				'port' => App::env('REDIS_PORT'),
+				'database' => $database,
 			];
 
 			if (App::env('REDIS_PASSWORD')) {
@@ -323,10 +325,26 @@ class AppConfigBuilder
 				'keyPrefix' => App::env('REDIS_KEY_PREFIX'),
 			];
 
-			$this->components['session'] = [
-				'class' => \yii\redis\Session::class,
-				'as session' => \craft\behaviors\SessionBehavior::class,
-			];
+			if (App::env('REDIS_MUTEX_ENABLED') === 'true') {
+				$this->components['mutex'] = [
+					'mutex' => \yii\redis\Mutex::class,
+					'redis' => [
+						...$this->components['redis'],
+						'database' => App::env('REDIS_MUTEX_DATABASE') ?: $database,
+					],
+				];
+			}
+
+			if (App::env('REDIS_SESSION_ENABLED') === 'true') {
+				$this->components['session'] = [
+					'class' => \yii\redis\Session::class,
+					'as session' => \craft\behaviors\SessionBehavior::class,
+					'redis' => [
+						...$this->components['redis'],
+						'database' => App::env('REDIS_SESSION_DATABASE') ?: $database,
+					],
+				];
+			}
 		}
 
 		return $this;
