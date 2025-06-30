@@ -108,6 +108,12 @@ The `AppConfigBuilder` provides methods to configure your CraftCMS application:
 - `withLoggerExceptError(array $except, bool $merge = true)`: Exclude error logs with the given categories
 - `build()`: Build the final configuration array
 
+#### Deprecator
+
+The `deprecator` component is automatically configured to throw exceptions if the `DEV_MODE` environment variable is set to `true`.
+
+To disable this behavior, set the `DEV_MODE` environment variable to `false`, or override the `deprecator` component in your app config.
+
 ### Mail Transport
 
 #### SMTP
