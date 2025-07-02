@@ -331,9 +331,9 @@ class AppConfigBuilder
 				'keyPrefix' => App::env('REDIS_KEY_PREFIX'),
 			];
 
-			if (App::env('REDIS_MUTEX_ENABLED') === 'true') {
+			if (App::env('REDIS_MUTEX_ENABLED') === true) {
 				$this->components['mutex'] = [
-					'mutex' => \yii\redis\Mutex::class,
+					'class' => \yii\redis\Mutex::class,
 					'redis' => [
 						...$this->components['redis'],
 						'database' => App::env('REDIS_MUTEX_DATABASE') ?: $database,
@@ -341,7 +341,7 @@ class AppConfigBuilder
 				];
 			}
 
-			if (App::env('REDIS_SESSION_ENABLED') === 'true') {
+			if (App::env('REDIS_SESSION_ENABLED') === true) {
 				$this->components['session'] = [
 					'class' => \yii\redis\Session::class,
 					'as session' => \craft\behaviors\SessionBehavior::class,
@@ -360,7 +360,7 @@ class AppConfigBuilder
 	{
 		$channel = $this->loggingAppName . '-' . ($this->isConsoleRequest === true ? 'console' : 'web');
 
-		if (getenv('REMOTE_LOGGING_ENABLED') === 'true') {
+		if (App::env('REMOTE_LOGGING_ENABLED') === true) {
 			$this->logger = new Logger($channel);
 
 			$this->loggerFilterErrorFn = static fn (): bool => true;
@@ -382,7 +382,7 @@ class AppConfigBuilder
 			YiiLogger::LEVEL_INFO,
 		];
 
-		if (getenv('REMOTE_DEBUG_LOGGING') === 'true') {
+		if (App::env('REMOTE_DEBUG_LOGGING') === true) {
 			$logLevels = array_merge($logLevels, [
 				YiiLogger::LEVEL_TRACE,
 			]);
@@ -443,7 +443,7 @@ class AppConfigBuilder
 
 	private function configureLogTargets(): self
 	{
-		if (getenv('REMOTE_LOGGING_ENABLED') === 'true') {
+		if (App::env('REMOTE_LOGGING_ENABLED') === true) {
 			// This... should be unnecessary. But here we are. See comments in the 'target' array below.
 			$disabledCraftLogTarget = [
 				'class' => MonologTarget::class,
