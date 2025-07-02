@@ -154,6 +154,11 @@ Redis-backed mutex component is automatically configured if the `REDIS_MUTEX_ENA
 
 To use a different Redis database for the mutex component, set the `REDIS_MUTEX_DATABASE` environment variable.
 
+To update the mutex expiration time, set the following environment variables:
+
+- `REDIS_MUTEX_EXPIRE_CONSOLE` (defaults to 900 seconds)
+- `REDIS_MUTEX_EXPIRE_WEB` (defaults to 30 seconds)
+
 #### Redis Session
 
 Redis-backed sessions are automatically configured if the `REDIS_SESSION_ENABLED` environment variable is set to `true`.

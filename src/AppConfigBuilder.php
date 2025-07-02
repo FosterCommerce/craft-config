@@ -336,6 +336,9 @@ class AppConfigBuilder
 					'class' => \yii\redis\Mutex::class,
 					'redis' => [
 						...$this->components['redis'],
+						'expire' => $this->isConsoleRequest === true
+							? (App::env('REDIS_MUTEX_EXPIRE_CONSOLE') ?: 900)
+							: (App::env('REDIS_MUTEX_EXPIRE_WEB') ?: 30),
 						'database' => App::env('REDIS_MUTEX_DATABASE') ?: $database,
 					],
 				];
