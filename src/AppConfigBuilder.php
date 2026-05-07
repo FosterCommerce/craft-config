@@ -49,7 +49,7 @@ class AppConfigBuilder
 		\craft\elements\User::class . '::_validateUserAgent',
 		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
 		\yii\db\Connection::class . '::*',
-		\yii\filters\RateLimiter::class, '::beforeAction',
+		\yii\filters\RateLimiter::class . '::beforeAction',
 		\yii\web\Session::class . '::*',
 		\yii\web\User::class . '::loginByCookie',
 		\yii\web\User::class . '::login',
