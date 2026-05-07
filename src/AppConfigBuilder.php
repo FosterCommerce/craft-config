@@ -49,6 +49,7 @@ class AppConfigBuilder
 		\craft\elements\User::class . '::_validateUserAgent',
 		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
 		\yii\db\Connection::class . '::*',
+		\yii\filters\RateLimiter::class, '::beforeAction',
 		\yii\web\Session::class . '::*',
 		\yii\web\User::class . '::loginByCookie',
 		\yii\web\User::class . '::login',
@@ -56,6 +57,7 @@ class AppConfigBuilder
 		\yii\web\User::class . '::renewAuthStatus',
 		\yii\web\User::class . '::getIdentityAndDurationFromCookie',
 		'nystudio107\seomatic\*',
+		'nystudio107\retour\*',
 		'blitz',
 	];
 
@@ -65,6 +67,12 @@ class AppConfigBuilder
 	private const DEFAULT_LOGGER_EXCEPT_ERROR = [
 		// Exclude logs in the error log target
 		\yii\web\HttpException::class . ':404',
+	];
+
+	private const LOGGER_EXCEPT_EXTRA = [
+		// These are additonal spammy error logs that can be disabled, but that _might_ hide useful details if excluded.
+		\yii\web\HttpException::class . ':403',
+		\yii\web\HttpException::class . ':400',
 	];
 
 	/**
@@ -254,9 +262,15 @@ class AppConfigBuilder
 	 */
 	public function withLoggerExceptError(array $except, bool $merge = true): self
 	{
+		$includeExtraErrorCategories = App::env('REMOTE_LOGGING_INCLUDE_EXTRA_ERROR_CATEGORIES') ?: false;
+		if (! is_bool($includeExtraErrorCategories)) {
+			$includeExtraErrorCategories = false;
+		}
+
 		$this->loggerExceptError = $merge
 			? [
 				...$this->loggerExceptError,
+				...$includeExtraErrorCategories ? self::LOGGER_EXCEPT_EXTRA : [],
 				...$except,
 			]
 			: $except;
