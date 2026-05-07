@@ -148,6 +148,7 @@ class AppConfigBuilder
 		$instance->isConsoleRequest = PHP_SAPI === 'cli';
 
 		$instance
+			->initLoggerExceptError()
 			->generateRequestId()
 			->configureDeprecator()
 			->configureQueue()
@@ -262,15 +263,9 @@ class AppConfigBuilder
 	 */
 	public function withLoggerExceptError(array $except, bool $merge = true): self
 	{
-		$includeExtraErrorCategories = App::env('REMOTE_LOGGING_INCLUDE_EXTRA_ERROR_CATEGORIES') ?: false;
-		if (! is_bool($includeExtraErrorCategories)) {
-			$includeExtraErrorCategories = false;
-		}
-
 		$this->loggerExceptError = $merge
 			? [
 				...$this->loggerExceptError,
-				...$includeExtraErrorCategories ? self::LOGGER_EXCEPT_EXTRA : [],
 				...$except,
 			]
 			: $except;
@@ -284,6 +279,21 @@ class AppConfigBuilder
 	public function withMailTransport(MailTransport $transport): self
 	{
 		$this->mailTransportConfigs[$transport->value] = static fn (): array => $transport->getConfiguration();
+
+		return $this;
+	}
+
+	private function initLoggerExceptError(): self
+	{
+		$includeExtraErrorCategories = App::env('REMOTE_LOGGING_INCLUDE_EXTRA_ERROR_CATEGORIES') ?: false;
+		if (! is_bool($includeExtraErrorCategories)) {
+			$includeExtraErrorCategories = false;
+		}
+
+		$this->loggerExceptError = [
+			...$this->loggerExceptError,
+			...$includeExtraErrorCategories ? self::LOGGER_EXCEPT_EXTRA : [],
+		];
 
 		return $this;
 	}

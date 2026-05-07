@@ -3,11 +3,11 @@
 namespace fostercommerce\craftconfig;
 
 use Craft;
+use craft\web\Request;
 use craft\web\Response;
 use yii\base\Application as BaseApplication;
 use yii\base\Event;
 use yii\base\Module as BaseModule;
-use yii\base\Response as BaseResponse;
 use yii\web\Application;
 
 class Module extends BaseModule
@@ -21,15 +21,21 @@ class Module extends BaseModule
 		Event::on(
 			Application::class,
 			BaseApplication::EVENT_BEFORE_REQUEST,
-			function (): void {
-				$path = Craft::$app->getRequest()->getPathInfo();
+			static function (): void {
+				$request = Craft::$app->getRequest();
+				if ($request->getIsConsoleRequest()) {
+					return;
+				}
+
+				/** @var Request $request */
+				$path = $request->getPathInfo();
 				$extPattern = '/\.(png|jpe?g|gif|webp|svg|woff2?|ttf|otf|eot|ico)$/i';
 
 				if (preg_match($extPattern, $path)) {
 					$fullPath = Craft::getAlias('@webroot') . '/' . ltrim($path, '/');
 
 					if (! is_file($fullPath)) {
-						$response = Craft::createObject(BaseResponse::class, [
+						$response = Craft::createObject(Response::class, [
 							'format' => Response::FORMAT_RAW,
 							'content' => 'Not found',
 						]);
