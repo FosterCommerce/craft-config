@@ -48,6 +48,8 @@ class AppConfigBuilder
 		\craft\elements\Asset::class . '::getDimensions',
 		\craft\elements\User::class . '::_validateUserAgent',
 		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
+		\craft\services\ProjectConfig::class . '::*',
+		\craft\queue\QueueLogBehavior::class . '::*',
 		\yii\db\Connection::class . '::*',
 		\yii\filters\RateLimiter::class . '::beforeAction',
 		\yii\web\Session::class . '::*',
