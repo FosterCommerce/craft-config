@@ -11,7 +11,8 @@ class LogTarget extends PsrTarget
 	 *
 	 * In the array of strings passed into the filter function:
 	 * - Index 0 is the message
-	 * - Index 1 is the category
+	 * - Index 1 is the level
+	 * - Index 2 is the category
 	 *
 	 * If the function returns `false`, the message will be excluded from the log.
 	 *

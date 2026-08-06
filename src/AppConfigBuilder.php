@@ -31,6 +31,13 @@ class AppConfigBuilder
 	];
 
 	/**
+	 * @var array<array-key, string>
+	 */
+	public const DEFAULT_EXCLUDE_ERROR_MESSAGE_PATTERNS = [
+		'/^(.*User is not authorized to perform this action).*$/',
+	];
+
+	/**
 	 * @var int
 	 */
 	private const DEFAULT_QUEUE_TTR = 7200;
@@ -483,7 +490,8 @@ class AppConfigBuilder
 			$loggerFilterFn = function (array $message): bool {
 				// Exclude logs by filtering out messages
 				// Position 0 is the message
-				// Position 1 is the category
+				// Position 1 is the level
+				// Position 2 is the category
 				foreach (self::DEFAULT_EXCLUDE_MESSAGE_PATTERNS as $excludeMessagePattern) {
 					if (preg_match($excludeMessagePattern, (string) $message[0])) {
 						return false;
@@ -495,7 +503,12 @@ class AppConfigBuilder
 			};
 
 			$loggerFilterErrorFn = function (array $message): bool {
-				// placeholder if we need to filter any error logs
+				foreach (self::DEFAULT_EXCLUDE_ERROR_MESSAGE_PATTERNS as $excludeErrorMessagePattern) {
+					if (preg_match($excludeErrorMessagePattern, (string) $message[0])) {
+						return false;
+					}
+				}
+
 				$loggerFilterErrorFn = $this->loggerFilterErrorFn;
 				return $loggerFilterErrorFn($message);
 			};
