@@ -167,20 +167,77 @@ To use a different Redis database for sessions, set the `REDIS_SESSION_DATABASE`
 
 ### Logging Configuration
 
-Remote logging can be enabled by setting `REMOTE_LOGGING_ENABLED` to `true` and then setting the following environment variables:
+Remote logging is disabled unless `REMOTE_LOGGING_ENABLED` is set to `true` and `SYSLOG_UDP_TOKEN` is set.
+
+Set the following environment variables:
 
 - `REMOTE_DEBUG_LOGGING=true` (for including trace level logs)
 - `SYSLOG_UDP_HOST`
 - `SYSLOG_UDP_PORT` (defaults to 514)
 - `SYSLOG_UDP_TOKEN`
+- `REMOTE_LOGGING_INCLUDE_EXTRA_ERROR_CATEGORIES=true` (optional; also ignores 400 and 403 errors)
 
-When remote logging is enabled, this package splits the logs into two streams, one for all logs and one for error logs only. This makes it possible to filter out noisy logs in one stream without affecting the other.
+The package sends logs to two streams:
+
+- The normal stream includes info and warning logs. It also includes trace logs when `REMOTE_DEBUG_LOGGING=true`.
+- The error stream includes error logs.
+
+#### Non-error Logs Ignored by Default
+
+These filters apply to the normal stream: info, warning, and trace logs when `REMOTE_DEBUG_LOGGING=true`.
+
+The normal stream ignores these messages:
+
+- Messages ending in `plugin loaded`
+- Messages ending in `module loaded`
+- Messages ending in `module bootstrapped`
+- Messages containing `Updating search indexes`
+
+The normal stream also ignores logs from these categories:
+
+- `craft\\elements\\Asset::getDimensions`
+- `craft\\elements\\User::_validateUserAgent`
+- `craft\\elements\\User::getIdentityAndDurationFromCookie`
+- `craft\\services\\ProjectConfig::*`
+- `craft\\queue\\QueueLogBehavior::*`
+- `yii\\base\\View::renderFile`
+- `yii\\db\\Connection::*`
+- `yii\\filters\\RateLimiter::beforeAction`
+- `yii\\web\\Session::*`
+- `yii\\web\\User::loginByCookie`
+- `yii\\web\\User::login`
+- `yii\\web\\User::logout`
+- `yii\\web\\User::renewAuthStatus`
+- `yii\\web\\User::getIdentityAndDurationFromCookie`
+- `nystudio107\\seomatic\\*`
+- `nystudio107\\retour\\*`
+- `nystudio107\\vite\\*`
+- `nystudio107\\typogrify\\*`
+- `nystudio107\\cookies\\*`
+- `blitz`
+
+These exclusions do not affect error logs. Errors from these categories still go to the error stream.
+
+#### Error Logs Ignored by Default
+
+The error stream ignores messages containing `User is not authorized to perform this action`.
+
+It also ignores this category:
+
+- `yii\\web\\HttpException:404`
+
+When `REMOTE_LOGGING_INCLUDE_EXTRA_ERROR_CATEGORIES=true`, the error stream also ignores:
+
+- `yii\\web\\HttpException:403`
+- `yii\\web\\HttpException:400`
 
 #### Custom Log Filtering
 
-You can exclude specific log categories and filter log messages based on content of the log message records.
+You can add category exclusions or filter messages by their contents. The default exclusions stay in place unless you pass `false` as the second argument to `withLoggerExcept()` or `withLoggerExceptError()`.
 
-For example, here we exclude logs based on category and filter out logs based on some regex patterns:
+The filter receives an array with the message at index `0`, the level at index `1`, and the category at index `2`. Returning `false` drops the log.
+
+For example:
 
 ```php
 // Define patterns to exclude from logging
@@ -203,7 +260,8 @@ $builder
 	// Filter log messages based on content of the log message record
     ->withLoggerFilterFn(function (array $record) use ($excludeMessagePatterns): bool {
         // Position 0 is the message
-        // Position 1 is the category
+        // Position 1 is the level
+        // Position 2 is the category
         foreach ($excludeMessagePatterns as $excludeMessagePattern) {
             if (preg_match($excludeMessagePattern, (string) $record[0])) {
                 return false;
@@ -216,7 +274,7 @@ $builder
 return $builder->build();
 ```
 
-The `withLoggerFilterErrorFn` and `withLoggerErrorExcept` methods work the same way as `withLoggerFilterFn` and `withLoggerExcept`, but they filter error logs instead of all logs.
+The `withLoggerFilterErrorFn()` and `withLoggerExceptError()` methods work the same way, but apply to the error stream.
 
 ## Default Behaviors
 

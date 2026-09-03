@@ -57,6 +57,7 @@ class AppConfigBuilder
 		\craft\elements\User::class . '::getIdentityAndDurationFromCookie',
 		\craft\services\ProjectConfig::class . '::*',
 		\craft\queue\QueueLogBehavior::class . '::*',
+		\yii\base\View::class . '::renderFile',
 		\yii\db\Connection::class . '::*',
 		\yii\filters\RateLimiter::class . '::beforeAction',
 		\yii\web\Session::class . '::*',
@@ -67,6 +68,9 @@ class AppConfigBuilder
 		\yii\web\User::class . '::getIdentityAndDurationFromCookie',
 		'nystudio107\seomatic\*',
 		'nystudio107\retour\*',
+		'nystudio107\vite\*',
+		'nystudio107\typogrify\*',
+		'nystudio107\cookies\*',
 		'blitz',
 	];
 
