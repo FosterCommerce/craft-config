@@ -154,10 +154,14 @@ Redis-backed mutex component is automatically configured if the `REDIS_MUTEX_ENA
 
 To use a different Redis database for the mutex component, set the `REDIS_MUTEX_DATABASE` environment variable.
 
+`REDIS_KEY_PREFIX` is applied to mutex lock keys as well, so sites sharing a Redis database do not collide.
+
 To update the mutex expiration time, set the following environment variables:
 
 - `REDIS_MUTEX_EXPIRE_CONSOLE` (defaults to 900 seconds)
 - `REDIS_MUTEX_EXPIRE_WEB` (defaults to 30 seconds)
+
+A Redis lock is dropped once its expiry passes, even if the work it was protecting is still running. See [Distributed Locks with Redis](https://redis.io/docs/latest/develop/clients/patterns/distributed-locks/).
 
 #### Redis Session
 
