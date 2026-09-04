@@ -370,13 +370,17 @@ class AppConfigBuilder
 
 			if (App::env('REDIS_MUTEX_ENABLED') === true) {
 				$this->components['mutex'] = [
-					'class' => \yii\redis\Mutex::class,
-					'expire' => $this->isConsoleRequest === true
-						? (App::env('REDIS_MUTEX_EXPIRE_CONSOLE') ?: 900)
-						: (App::env('REDIS_MUTEX_EXPIRE_WEB') ?: 30),
-					'redis' => [
-						...$this->components['redis'],
-						'database' => App::env('REDIS_MUTEX_DATABASE') ?: $database,
+					'class' => \craft\mutex\Mutex::class,
+					'mutex' => [
+						'class' => \yii\redis\Mutex::class,
+						'expire' => $this->isConsoleRequest === true
+							? (App::env('REDIS_MUTEX_EXPIRE_CONSOLE') ?: 900)
+							: (App::env('REDIS_MUTEX_EXPIRE_WEB') ?: 30),
+						'keyPrefix' => App::env('REDIS_KEY_PREFIX') ?: null,
+						'redis' => [
+							...$this->components['redis'],
+							'database' => App::env('REDIS_MUTEX_DATABASE') ?: $database,
+						],
 					],
 				];
 			}
